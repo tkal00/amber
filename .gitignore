@@ -7,6 +7,9 @@
 *.o
 *.obj
 
+# Compiled Binaries
+*.run
+
 # Precompiled Headers
 *.gch
 *.pch
@@ -16,7 +19,7 @@
 *.dylib
 *.dll
 
-# Fortran module files
+# Fortran module files (im sorry WHAT?)
 *.mod
 *.smod
 
