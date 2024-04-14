@@ -1,2 +1,4 @@
+SRC := $(wildcard *.cpp ./**/*.cpp)
+
 server:
-	g++ main.cpp -o server.run -std=c++23
+	g++ $(SRC) -o server.run -std=c++23 -I./ -g -O0
