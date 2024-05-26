@@ -1,5 +1,9 @@
 #include "message.h"
+#include "http/messageTypes.h"
 #include <iostream>
+#include <string>
+#include <sstream>
+using namespace std::literals;
 
 void amber::http::Message::setHeader(std::string_view name, std::string_view value)
 {
@@ -76,5 +80,33 @@ amber::http::Request::Request(std::string_view data)
     }
     for (auto& [name, val] : m_headers)
         std::cout << name << ": " << val << '\n';
-    m_isValid = true;
+}
+
+amber::http::Response::Response()
+    : m_status(none)
+{}
+
+amber::http::Response::Response(StatusCode status)
+    : m_status(status)
+{}
+
+auto amber::http::Response::toString() -> std::string
+{
+    auto statusMsg = [&]() -> std::string_view
+    {
+        switch (m_status)
+        {
+        case ok_200:        return "OK"sv;          break;
+        case notFound_404:  return "Not found"sv;   break;
+        default: break;
+        }
+        std::cout << "unknown status value " << m_status << '\n';
+        return {};
+    }();
+    std::stringstream ss;
+    ss << "HTTP/1.1 " << m_status << ' ' << statusMsg << "\n";
+    for (auto [key, value] : m_headers)
+        ss << key << ": " << value << "\n";
+    ss << "\n" << m_body;
+    return ss.str();
 }

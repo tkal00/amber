@@ -14,22 +14,22 @@ namespace http
         put,
         post,
         get,
-        del 
+        del,
+        patch,
+        head,
+        options
     };
 
     class Message
     {
     protected:
-        Message() : m_isValid(false) {}
+        Message() {}
 
     public:
-        void            setHeader(std::string_view name, std::string_view value)    ;
-        void            setBody(std::string_view body)                              ;
-        inline bool     isValid()                                                   { return m_isValid; }
+        void setHeader(std::string_view name, std::string_view value);
+        void setBody(std::string_view body);
 
     protected:
-        bool m_isValid;
-
         utils::StringMap m_headers;
         std::string m_body;
     };
@@ -38,8 +38,7 @@ namespace http
     {
     public:
         explicit Request(std::string_view data);
-
-        std::string_view getPath()                                                  { return m_path; }
+        auto getPath() -> std::string_view { return m_path; }
 
     private:
         Method m_method;
@@ -49,7 +48,11 @@ namespace http
     class Response : public Message
     {
     public:
-        explicit Response(StatusCode status);
+        Response();
+        Response(StatusCode status);
+
+        void setStatus(StatusCode status) { m_status = status; }
+        auto toString() -> std::string;
 
     private:
         StatusCode m_status;

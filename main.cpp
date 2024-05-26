@@ -1,15 +1,31 @@
 #include "http/message.h"
+#include "http/httpserver.h"
+#include "http/messageTypes.h"
 #include <iostream>
 #include <netinet/in.h>
+#include <fstream>
 #include <map>
 #include <sys/socket.h>
 #include <signal.h>
 #include <sstream>
 #include <string>
 #include <string.h>
+#include <stdlib.h>
 
 constexpr unsigned c_bufferSize = 1024*1024;
 constexpr int c_port = 3001;
+constexpr const char* c_indexPath = "/home/tkal/dev/html/index.html";
+
+std::string readFile(std::string path)
+{
+    std::stringstream outputBuffer;
+    std::ifstream file;
+    file.open(path, std::iostream::binary);
+    if (!file.is_open() || !file.good())
+        std::cerr << "couldnt open path: " << path << '\n';
+    outputBuffer << file.rdbuf();
+    return outputBuffer.str();
+}
 
 inline std::string createSimpleResponse(std::string_view msg, int status = 200)
 {
@@ -33,45 +49,6 @@ void error(std::string_view msg)
     exit(1);
 }
 
-struct serverSockRAII
-{
-    serverSockRAII()
-        : fd(-1)
-    {
-        sockaddr_in serverAddress;
-        serverAddress.sin_family = AF_INET;
-        serverAddress.sin_port = htons(c_port);
-        serverAddress.sin_addr.s_addr = INADDR_ANY;
-
-        fd = socket(AF_INET, SOCK_STREAM, 0);
-        if (fd == -1)
-            error("listening socket failed to create");
-        static struct linger ling;
-        ling.l_onoff = 1;
-        ling.l_linger = 0;
-        if (setsockopt(fd, SOL_SOCKET, SO_LINGER, &ling, sizeof(ling)) < 0)
-            error("setsockopt: ");
-        int reuseaddr = 1;
-        if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr, sizeof(int)) < 0)
-            error("setsockopt: ");
-        if (bind(fd, (sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
-            error("couldn't bind listening socket");
-        listen(fd, 1024);
-    }
-
-    ~serverSockRAII()
-    {
-        if (fd != -1)
-        {
-            shutdown(fd, SHUT_RDWR);
-            
-            close(fd);
-        }
-    }
-
-    int fd;
-};
-
 bool g_running = true;
 
 void handleInterrupt(int s)
@@ -86,41 +63,30 @@ int main(int argc, const char** argv)
     sigemptyset(&sigInterruptHandler.sa_mask);
     sigaction(SIGINT, &sigInterruptHandler, NULL);
 
-    serverSockRAII server;
-    auto res = createSimpleResponse("<h1>hello world</h1>");
-
+    std::string g_rootPath = std::getenv("AMBER_ROOTDIR");
+    amber::http::HttpServer server;
+    auto& defaultRouter = server.addRouter();
+    defaultRouter.addRoute("/")
+        .get([](auto& req, auto& res) -> bool
+            {
+                std::cout << "invoked callback for GET /\n";
+                res.setBody(readFile(c_indexPath));
+                res.setStatus(amber::http::ok_200);
+                return true;
+            });
+    defaultRouter.addRoute("/test")
+        .get([](auto& req, auto& res) -> bool
+            {
+                std::cout << "invoked callback for GET /\n";
+                res.setBody("test route");
+                res.setStatus(amber::http::ok_200);
+                return true;
+            });
+    server.start(c_port);
     while (g_running)
     {
-        int acceptfd = accept(server.fd, nullptr, nullptr);
-        if (acceptfd < 0)
-        {
-            std::cout << "mangled connection\n";
-            continue;
-        }
-        int recvBytes = 0;
-        std::string request;
-        request.reserve(1024);
-        constexpr int c_readBufferSize = 512;
-        char buf[c_readBufferSize];
-        char peekBuf;
-        recvBytes = recv(acceptfd, &peekBuf, 1, MSG_PEEK);
-        do {
-            recvBytes = recv(acceptfd, buf, c_readBufferSize, MSG_DONTWAIT);
-            if (recvBytes > 0)
-                request.append(buf, recvBytes);
-        } while (recvBytes > 0);
-        if (!request.empty())
-            std::cout << request << '\n';
-
-        std::cout << "Request Obj: \n";
-        amber::http::Request obj(request);
-        std::cout << "with path: " << obj.getPath() << '\n';
-
-        int n = send(acceptfd, res.data(), res.length(), 0);
-        if (n < 0)
-            std::cout << "failed to send response\n";
-        shutdown(acceptfd, SHUT_RDWR);
-        close(acceptfd);
+        server.processRequest();
     }
+    server.stop();
     return 0;
 }

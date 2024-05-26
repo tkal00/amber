@@ -22,7 +22,7 @@ namespace http
         badRequest_400          = 400,
         unauthorized_401        = 401,
         forbidden_403           = 403,
-        notFound                = 404,
+        notFound_404            = 404,
     };
 }
 
