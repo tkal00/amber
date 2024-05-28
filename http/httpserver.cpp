@@ -9,31 +9,6 @@
 
 namespace 
 {
-    std::string createSimpleResponse(std::string_view msg, int status = 200)
-    {
-        std::map<int, std::string_view> statusMsg = 
-        {
-            { 200, "OK" },
-            { 404, "Not found" },
-        };
-
-        std::stringstream ss;
-        ss  << "HTTP/1.1 " << status << ' ' << statusMsg[status] << '\n'
-            << '\n'
-            << msg;
-        return ss.str();
-    }
-
-    std::string readFile(std::string path)
-    {
-        std::stringstream outputBuffer;
-        std::ifstream file;
-        file.open(path, std::iostream::binary);
-        if (!file.is_open() || !file.good())
-            std::cerr << "couldnt open path: " << path << '\n';
-        outputBuffer << file.rdbuf();
-        return outputBuffer.str();
-    }
 }
 
 amber::http::HttpServer::HttpServer()
