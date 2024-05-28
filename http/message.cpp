@@ -90,7 +90,8 @@ amber::http::Response::Response(StatusCode status)
     : m_status(status)
 {}
 
-auto amber::http::Response::toString() -> std::string
+// set param includeBody to false only for logging purposes
+auto amber::http::Response::toString(bool includeBody /* = true */) -> std::string
 {
     auto statusMsg = [&]() -> std::string_view
     {
@@ -107,6 +108,7 @@ auto amber::http::Response::toString() -> std::string
     ss << "HTTP/1.1 " << m_status << ' ' << statusMsg << "\n";
     for (auto [key, value] : m_headers)
         ss << key << ": " << value << "\n";
-    ss << "\n" << m_body;
+    if (includeBody)
+        ss << "\n" << m_body;
     return ss.str();
 }

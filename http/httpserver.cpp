@@ -101,7 +101,7 @@ void amber::http::HttpServer::processRequest()
                 break;
 
     auto resString = response.toString();
-    std::cout << "Response Obj: \n" << resString;
+    std::cout << "Response Obj: \n" << response.toString(false);
     int n = send(fd, resString.data(), resString.length(), 0);
     if (n < 0)
         std::cout << "failed to send response\n";

@@ -52,7 +52,7 @@ namespace http
         Response(StatusCode status);
 
         void setStatus(StatusCode status) { m_status = status; }
-        auto toString() -> std::string;
+        auto toString(bool includeBody = true) -> std::string;
 
     private:
         StatusCode m_status;
