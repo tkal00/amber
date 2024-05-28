@@ -1,4 +1,4 @@
-#include "http/message.h"
+#include "core/config.h"
 #include "http/httpserver.h"
 #include "http/messageTypes.h"
 #include <iostream>
@@ -14,10 +14,10 @@
 
 constexpr unsigned c_bufferSize = 1024*1024;
 constexpr int c_port = 3001;
-constexpr const char* c_indexPath = "/home/tkal/dev/html/index.html";
 
 std::string readFile(std::string path)
 {
+    path.insert(0, "/").insert(0, amber::config::webRootPath());
     std::stringstream outputBuffer;
     std::ifstream file;
     file.open(path, std::iostream::binary);
@@ -69,16 +69,21 @@ int main(int argc, const char** argv)
     defaultRouter.addRoute("/")
         .get([](auto& req, auto& res) -> bool
             {
-                std::cout << "invoked callback for GET /\n";
-                res.setBody(readFile(c_indexPath));
+                res.setBody(readFile("index.html"));
                 res.setStatus(amber::http::ok_200);
                 return true;
             });
-    defaultRouter.addRoute("/test")
+    defaultRouter.addRoute("/css/styles.css")
         .get([](auto& req, auto& res) -> bool
             {
-                std::cout << "invoked callback for GET /\n";
-                res.setBody("test route");
+                res.setBody(readFile("css/styles.css"));
+                res.setStatus(amber::http::ok_200);
+                return true;
+            });
+    defaultRouter.addRoute("/js/welcome.js")
+        .get([](auto& req, auto& res) -> bool
+            {
+                res.setBody(readFile("js/welcome.js"));
                 res.setStatus(amber::http::ok_200);
                 return true;
             });

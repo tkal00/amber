@@ -1,30 +1,15 @@
-#ifndef AMBER_HEADER_STRING_MAP
-#define AMBER_HEADER_STRING_MAP
+#ifndef AMBER_HEADER_STRINGMAP
+#define AMBER_HEADER_STRINGMAP
+#include "stringCompare.h"
 #include <map>
 #include <unordered_map>
-#include <string>
-#include <string_view>
 
-namespace amber
+namespace amber::util
 {
-
-namespace utils
-{
-
-struct Compare
-{
-    using is_transparent = void;
-    std::size_t operator()(const std::string_view& a)                       const { return std::hash<std::string_view>()(a); };
-    std::size_t operator()(const std::string& a)                            const { return std::hash<std::string>()(a); };
-    bool operator()(const std::string_view& a, const std::string_view& b)   const { return Compare()(a) < Compare()(b); };
-    bool operator()(const std::string& a, const std::string& b)             const { return Compare()(a) < Compare()(b); };
-};
-
-using StringMap             = std::map<             std::string,    std::string,    Compare>;
-using StringMapUnordered    = std::unordered_map<   std::string,    std::string,    Compare>;
-
-}
-
+    template<typename T>
+    using StringMap = std::map<std::string, T, Compare>;
+    template<typename T>
+    using StringMapUnordered = std::unordered_map<std::string, T, Compare>;
 }
 
 #endif

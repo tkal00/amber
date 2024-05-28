@@ -30,7 +30,7 @@ namespace http
         void setBody(std::string_view body);
 
     protected:
-        utils::StringMap m_headers;
+        util::StringMap<std::string> m_headers;
         std::string m_body;
     };
 
