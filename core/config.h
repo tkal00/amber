@@ -5,6 +5,7 @@
 namespace amber::config
 {
     auto webRootPath() -> std::string_view;
+    auto publicRootPath() -> std::string_view;
 }
 
 #endif

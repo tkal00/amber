@@ -5,19 +5,40 @@
 #include <sstream>
 using namespace std::literals;
 
-void amber::http::Message::setHeader(std::string_view name, std::string_view value)
+auto amber::http::fileExtToMimeType(std::string_view ext) -> std::string_view
 {
-    auto found = m_headers.lower_bound(name);
-    if (found != m_headers.end() && m_headers.key_comp()(found->first, name))
-        found->second = value;
-    else
-        m_headers.emplace_hint(found, name, value);
+    static const util::StringMapUnordered<std::string_view> map =
+    {
+        { ".ico",   "image/x-icon" },
+        { ".html",  "text/html" },
+        { ".js",    "text/javascript" },
+        { ".json",  "application/json" },
+        { ".css",   "text/css" },
+        { ".png",   "image/png" },
+        { ".jpg",   "image/jpeg" },
+        { ".jpeg",  "image/jpeg" },
+    };
+    if (auto found = map.find(ext); found != map.end())
+        return found->second;
+    return {};
 }
 
-void amber::http::Message::setBody(std::string_view body)
+void amber::http::Message::setHeader(std::string_view name, std::string_view value)
 {
-    m_body = body;
+    if (auto found = m_headers.find(name); found != m_headers.end())
+        found->second = value;
+    else
+        m_headers.emplace(name, value);
 }
+auto amber::http::Message::getHeader(std::string_view name) -> std::string_view
+{
+    if (auto found = m_headers.find(name); found != m_headers.end())
+        return found->second;
+    return {};
+}
+
+void amber::http::Message::setBody(std::string_view body)   { m_body.assign(body); }
+auto amber::http::Message::getBody() -> std::string_view    { return m_body; }
 
 // GET /hello HTTP/1.1
 // Host: localhost:3001
@@ -80,7 +101,11 @@ amber::http::Request::Request(std::string_view data)
     }
     for (auto& [name, val] : m_headers)
         std::cout << name << ": " << val << '\n';
+    std::cout << '\n';
 }
+
+auto amber::http::Request::getPath() -> std::string_view { return m_path; }
+auto amber::http::Request::getMethod() -> Method { return m_method; }
 
 amber::http::Response::Response()
     : m_status(none)

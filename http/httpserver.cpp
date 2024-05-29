@@ -1,15 +1,9 @@
 #include "httpserver.h"
 #include <netinet/in.h>
-#include <fstream>
 #include <iostream>
-#include <sstream>
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
-
-namespace 
-{
-}
 
 amber::http::HttpServer::HttpServer()
     : m_listener(-1)
@@ -66,10 +60,11 @@ void amber::http::HttpServer::stop()
         ::shutdown(m_listener, SHUT_RDWR);
         ::close(m_listener);
     }
+    m_isActive = false;
 }
 
 // using a pipeline design instead of rigid function flow might be interesting
-void amber::http::HttpServer::processRequest()
+void amber::http::HttpServer::handleRequest()
 {
     int fd = accept(m_listener, nullptr, nullptr);
     if (fd < 0)
@@ -96,21 +91,15 @@ void amber::http::HttpServer::processRequest()
     amber::http::Request request(rawRequest);
     amber::http::Response response;
     for (std::shared_ptr<Router> router : m_routers)
-        if (auto* route = router->getRoute(request.getPath()); route != nullptr)
-            if (!route->invokeGet(request, response))
-                break;
-
+    {
+        if (router->handleRequest(request, response))
+            break;
+    }
     auto resString = response.toString();
-    std::cout << "Response Obj: \n" << response.toString(false);
+    std::cout << "Response Obj: \n" << response.toString(false) << '\n';
     int n = send(fd, resString.data(), resString.length(), 0);
     if (n < 0)
         std::cout << "failed to send response\n";
     shutdown(fd, SHUT_RDWR);
     close(fd);
-}
-
-amber::http::Router& amber::http::HttpServer::addRouter()
-{
-    m_routers.emplace_back(new Router());
-    return *m_routers.back();
 }

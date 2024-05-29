@@ -1,47 +1,40 @@
 #ifndef AMBER_HTTP_ROUTER
 #define AMBER_HTTP_ROUTER
 #include "message.h"
-#include <memory>
-#include <string>
 
 namespace amber::http
 {
-    class Route
-    {
-    public:
-        using self = Route&;
-        using CallbackFn = bool(*)(Request&, Response&);
-        Route(std::string);
-        Route(const Route&) = delete;
-        Route& operator=(const Route&) = delete;
-        ~Route();
-
-        auto get(CallbackFn fn) -> Route&;
-        auto post(CallbackFn fn) -> Route&;
-
-        auto invokeGet(Request&, Response&) -> bool;
-        auto invokePost(Request&, Response&) -> bool;
-
-    private:
-        std::string m_path;
-        CallbackFn m_callbackGet;
-        CallbackFn m_callbackPost;
-    };
-
     class Router
     {
     public:
+        using CallbackFn = bool(*)(Request&, Response&);
         Router();
         Router(const Router&) = delete;
         Router& operator=(const Router&) = delete;
         ~Router();
 
-        static Router& get() { static Router instance; return instance; }
-        auto addRoute(std::string_view path) -> Route&;
-        auto getRoute(std::string_view path) -> Route*;
+        auto get(std::string_view path, CallbackFn fn)  -> decltype(*this);
+        auto post(std::string_view path, CallbackFn fn) -> decltype(*this);
+        auto put(std::string_view path, CallbackFn fn)  -> decltype(*this);
+        auto del(std::string_view path, CallbackFn fn)  -> decltype(*this);
+
+        // returns true request has been consumed
+        virtual auto handleRequest(Request&, Response&) -> bool;
 
     private:
-        std::unordered_map<std::string, Route> m_routes;
+        struct Route
+        {
+            Route(int unused) {};
+            CallbackFn get      = nullptr;
+            CallbackFn post     = nullptr;
+            CallbackFn put      = nullptr;
+            CallbackFn del      = nullptr;
+        };
+
+        auto getOrAddRoute(std::string_view path) -> Route&;
+        auto getRoute(std::string_view path) -> Route*;
+
+        util::StringMapUnordered<Route> m_routes;
     };
 }
 

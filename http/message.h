@@ -20,6 +20,8 @@ namespace http
         options
     };
 
+    auto fileExtToMimeType(std::string_view ext) -> std::string_view;
+
     class Message
     {
     protected:
@@ -27,10 +29,12 @@ namespace http
 
     public:
         void setHeader(std::string_view name, std::string_view value);
+        auto getHeader(std::string_view name) -> std::string_view;
         void setBody(std::string_view body);
+        auto getBody() -> std::string_view;
 
     protected:
-        util::StringMap<std::string> m_headers;
+        util::StringMapUnordered<std::string> m_headers;
         std::string m_body;
     };
 
@@ -38,7 +42,8 @@ namespace http
     {
     public:
         explicit Request(std::string_view data);
-        auto getPath() -> std::string_view { return m_path; }
+        auto getPath()      -> std::string_view;
+        auto getMethod()    -> Method;
 
     private:
         Method m_method;

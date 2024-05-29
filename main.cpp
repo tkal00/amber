@@ -1,6 +1,6 @@
 #include "core/config.h"
 #include "http/httpserver.h"
-#include "http/messageTypes.h"
+#include "http/router/staticrouter.h"
 #include <iostream>
 #include <netinet/in.h>
 #include <fstream>
@@ -63,34 +63,39 @@ int main(int argc, const char** argv)
     sigemptyset(&sigInterruptHandler.sa_mask);
     sigaction(SIGINT, &sigInterruptHandler, NULL);
 
-    std::string g_rootPath = std::getenv("AMBER_ROOTDIR");
     amber::http::HttpServer server;
-    auto& defaultRouter = server.addRouter();
-    defaultRouter.addRoute("/")
-        .get([](auto& req, auto& res) -> bool
+    server.pushRouter<amber::http::StaticRouter>("public/");
+    auto defaultRouter = server.pushRouter();
+    defaultRouter->get("/",
+            [](auto& req, auto& res) -> bool
             {
+                std::cout << "sending this\n";
                 res.setBody(readFile("index.html"));
                 res.setStatus(amber::http::ok_200);
                 return true;
             });
-    defaultRouter.addRoute("/css/styles.css")
-        .get([](auto& req, auto& res) -> bool
+    defaultRouter->get("/css/styles.css",
+            [](auto& req, auto& res) -> bool
             {
                 res.setBody(readFile("css/styles.css"));
+                res.setHeader("Content-Type", amber::http::fileExtToMimeType(".css"));
                 res.setStatus(amber::http::ok_200);
                 return true;
             });
-    defaultRouter.addRoute("/js/welcome.js")
-        .get([](auto& req, auto& res) -> bool
+    // todo: default router for handling js files with MIME type
+    defaultRouter->get("/js/welcome.js",
+            [](auto& req, auto& res) -> bool
             {
                 res.setBody(readFile("js/welcome.js"));
+                res.setHeader("Content-Type", amber::http::fileExtToMimeType(".js"));
                 res.setStatus(amber::http::ok_200);
                 return true;
             });
+    // todo: default router for handling blob data (images)
     server.start(c_port);
     while (g_running)
     {
-        server.processRequest();
+        server.handleRequest();
     }
     server.stop();
     return 0;
