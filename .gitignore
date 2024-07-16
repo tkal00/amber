@@ -37,3 +37,4 @@
 # Misc
 .*
 !.gitignore
+compile_commands.json

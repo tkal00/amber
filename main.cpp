@@ -1,6 +1,7 @@
 #include "core/config.h"
 #include "http/httpserver.h"
 #include "http/router/staticrouter.h"
+#include "log/log.h"
 #include <iostream>
 #include <netinet/in.h>
 #include <fstream>
@@ -62,6 +63,7 @@ int main(int argc, const char** argv)
     sigInterruptHandler.sa_handler = &handleInterrupt;
     sigemptyset(&sigInterruptHandler.sa_mask);
     sigaction(SIGINT, &sigInterruptHandler, NULL);
+    LOG_INFO("started up server on port: " << c_port);
 
     amber::http::HttpServer server;
     server.pushRouter<amber::http::StaticRouter>("public/");
