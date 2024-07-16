@@ -1,6 +1,7 @@
 #include "core/config.h"
 #include "http/httpserver.h"
 #include "http/router/staticrouter.h"
+#include "http/middleware/static.h"
 #include "log/log.h"
 #include <iostream>
 #include <netinet/in.h>
@@ -67,30 +68,12 @@ int main(int argc, const char** argv)
     LOG_INFO("started up server on port: " << c_port);
 
     amber::http::HttpServer server;
-    server.pushRouter<amber::http::StaticRouter>("public/");
     auto defaultRouter = server.pushRouter();
+    defaultRouter->addPreHandler(&amber::http::middleware::serveStatic);
     defaultRouter->get("/",
             [](auto& req, auto& res) -> bool
             {
-                std::cout << "sending this\n";
                 res.setBody(readFile("index.html"));
-                res.setStatus(amber::http::ok_200);
-                return true;
-            });
-    defaultRouter->get("/css/styles.css",
-            [](auto& req, auto& res) -> bool
-            {
-                res.setBody(readFile("css/styles.css"));
-                res.setHeader("Content-Type", amber::http::fileExtToMimeType(".css"));
-                res.setStatus(amber::http::ok_200);
-                return true;
-            });
-    // todo: default router for handling js files with MIME type
-    defaultRouter->get("/js/welcome.js",
-            [](auto& req, auto& res) -> bool
-            {
-                res.setBody(readFile("js/welcome.js"));
-                res.setHeader("Content-Type", amber::http::fileExtToMimeType(".js"));
                 res.setStatus(amber::http::ok_200);
                 return true;
             });

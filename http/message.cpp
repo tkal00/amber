@@ -1,5 +1,6 @@
 #include "message.h"
 #include "http/messageTypes.h"
+#include "log/log.h"
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -99,9 +100,6 @@ amber::http::Request::Request(std::string_view data)
         if (!headerName.empty() && !headerValue.empty())
             setHeader(headerName, headerValue);
     }
-    for (auto& [name, val] : m_headers)
-        std::cout << name << ": " << val << '\n';
-    std::cout << '\n';
 }
 
 auto amber::http::Request::getPath() -> std::string_view { return m_path; }
@@ -126,7 +124,7 @@ auto amber::http::Response::toString(bool includeBody /* = true */) -> std::stri
         case notFound_404:  return "Not found"sv;   break;
         default: break;
         }
-        std::cout << "unknown status value " << m_status << '\n';
+        LOG_ERROR("unknown status value: " << m_status);
         return {};
     }();
     std::stringstream ss;

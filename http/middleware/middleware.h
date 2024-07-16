@@ -1,0 +1,6 @@
+#ifndef AMBER_HTTP_MIDDLEWARE
+#define AMBER_HTTP_MIDDLEWARE
+
+
+
+#endif
