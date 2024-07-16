@@ -12,6 +12,7 @@
 #include <string>
 #include <string.h>
 #include <stdlib.h>
+#include <thread>
 
 constexpr unsigned c_bufferSize = 1024*1024;
 constexpr int c_port = 3001;
