@@ -2,8 +2,9 @@
 #define AMBER_HTTP_SERVER
 #include "router.h"
 #include "core/server.h"
-#include <vector>
 #include <memory>
+#include <set>
+#include <vector>
 
 namespace amber::http
 {
@@ -13,10 +14,8 @@ namespace amber::http
         HttpServer();
         ~HttpServer();
 
-        bool start(int port);
-        void stop();
-
-        void handleRequest();
+        void pollConnections();
+        void handleRequest(Connection&& conn);
 
         template<typename T, typename... Args> requires std::is_same_v<T, Router> || std::is_base_of_v<Router, T>
         auto pushRouter(Args&&... args) -> std::shared_ptr<T> 
@@ -28,9 +27,9 @@ namespace amber::http
         auto pushRouter() -> std::shared_ptr<Router> { return pushRouter<Router>(); }
 
     private:
-        int m_listener;
-        bool m_isActive;
+        void handleConnection_threaded(Connection&& conn);
         std::vector<std::shared_ptr<Router>> m_routers;
+        std::vector<Connection> m_connections; // TODO: replace with sessions
     };
 }
 

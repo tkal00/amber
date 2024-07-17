@@ -29,6 +29,7 @@ namespace http
 
     public:
         void setHeader(std::string_view name, std::string_view value);
+        void setHeader(std::string_view name, std::integral auto value) { auto tmp = std::to_string(value); setHeader(name, tmp); }
         auto getHeader(std::string_view name) -> std::string_view;
         void setBody(std::string_view body);
         auto getBody() -> std::string_view;

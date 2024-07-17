@@ -7,13 +7,11 @@ auto amber::http::middleware::serveStatic(Request &req, Response &res) -> bool
 {
         if (req.getMethod() != Method::get)
                 return true;
-        LOG_TRACE(req.getPath());
         std::string path;
         path.insert(0, "/").insert(0, amber::config::publicRootPath()).append(req.getPath());
         std::stringstream outputBuffer;
         std::ifstream file;
         file.open(path, std::iostream::binary);
-        LOG_TRACE(path);
 
         auto reqPath = req.getPath();
         std::string_view ext;
@@ -21,13 +19,14 @@ auto amber::http::middleware::serveStatic(Request &req, Response &res) -> bool
                 ext = reqPath.substr(pos);
 
         if (!file.is_open() || !file.good() || ext.empty()) {
-                LOG_TRACE("no static file found");
+                LOG_TRACE("no static file found: " << req.getPath());
                 res.setStatus(http::StatusCode::notFound_404);
                 return true;
         }
         outputBuffer << file.rdbuf();
         res.setBody(outputBuffer.str());
         res.setHeader("Content-Type", amber::http::fileExtToMimeType(ext));
+        res.setHeader("Connection", "keep-alive");
         res.setStatus(amber::http::ok_200);
         return false;
 }

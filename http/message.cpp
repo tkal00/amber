@@ -8,34 +8,34 @@ using namespace std::literals;
 
 auto amber::http::fileExtToMimeType(std::string_view ext) -> std::string_view
 {
-    static const util::StringMapUnordered<std::string_view> map =
-    {
-        { ".ico",   "image/x-icon" },
-        { ".html",  "text/html" },
-        { ".js",    "text/javascript" },
-        { ".json",  "application/json" },
-        { ".css",   "text/css" },
-        { ".png",   "image/png" },
-        { ".jpg",   "image/jpeg" },
-        { ".jpeg",  "image/jpeg" },
-    };
-    if (auto found = map.find(ext); found != map.end())
-        return found->second;
-    return {};
+        static const util::StringMapUnordered<std::string_view> map = {
+                { ".ico",   "image/x-icon" },
+                { ".html",  "text/html" },
+                { ".js",    "text/javascript" },
+                { ".json",  "application/json" },
+                { ".css",   "text/css" },
+                { ".png",   "image/png" },
+                { ".jpg",   "image/jpeg" },
+                { ".jpeg",  "image/jpeg" },
+        };
+        if (auto found = map.find(ext); found != map.end())
+                return found->second;
+        return {};
 }
 
 void amber::http::Message::setHeader(std::string_view name, std::string_view value)
 {
-    if (auto found = m_headers.find(name); found != m_headers.end())
-        found->second = value;
-    else
-        m_headers.emplace(name, value);
+        if (auto found = m_headers.find(name); found != m_headers.end())
+                found->second = value;
+        else
+                m_headers.emplace(name, value);
 }
+
 auto amber::http::Message::getHeader(std::string_view name) -> std::string_view
 {
-    if (auto found = m_headers.find(name); found != m_headers.end())
-        return found->second;
-    return {};
+        if (auto found = m_headers.find(name); found != m_headers.end())
+                return found->second;
+        return {};
 }
 
 void amber::http::Message::setBody(std::string_view body)   { m_body.assign(body); }
