@@ -28,5 +28,6 @@ auto amber::http::middleware::serveStatic(Request &req, Response &res) -> bool
         res.setHeader("Content-Type", amber::http::fileExtToMimeType(ext));
         res.setHeader("Connection", "keep-alive");
         res.setStatus(amber::http::ok_200);
+        LOG_TRACE("served static file: " << req.getPath());
         return false;
 }

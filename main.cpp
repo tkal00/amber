@@ -15,7 +15,7 @@
 #include <thread>
 
 constexpr unsigned c_bufferSize = 1024*1024;
-constexpr int c_port = 3001;
+constexpr int c_port = 8080;
 
 std::string readFile(std::string path)
 {
@@ -75,6 +75,7 @@ int main(int argc, const char** argv)
                         res.setStatus(amber::http::ok_200);
                         res.setHeader("Content-Type", "text/html");
                         res.setHeader("Connection", "Keep-Alive");
+                        LOG_TRACE("served path: " << req.getPath());
                         return true;
                 }
         );

@@ -26,12 +26,11 @@ void amber::http::HttpServer::handleConnection_threaded(amber::Connection&& conn
                                 break;
                 }
                 response.setHeader("Content-Length", response.getBody().length());
-                auto resString = response.toString();
                 // MAYBE: enforce the http/1.0 keep-alive design of the server being unable to
                 // push changes to the client without a prior request (HTTPConnection/Session)
-                int n = conn.send(resString);
+                int n = conn.send(response.toString());
                 if (!n)
-                        LOG_ERROR("failed to send response" << LOG_ERRNO());
+                        LOG_ERROR("failed to send response, " << LOG_ERRNO());
         }
 }
 
