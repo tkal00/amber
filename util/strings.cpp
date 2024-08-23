@@ -1,5 +1,6 @@
 #include "strings.h"
 #include <algorithm>
+#include <cctype>
 
 auto amber::util::string::isNumeric(std::string_view sv) -> bool
 {

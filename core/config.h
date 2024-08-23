@@ -1,7 +1,6 @@
 #ifndef AMBER_CORE_CONFIG
 #define AMBER_CORE_CONFIG
 #include <string_view>
-#include "log/log.h"
 
 namespace amber::config
 {
@@ -14,6 +13,8 @@ namespace amber::config
         }
         DEFINE_VAR("AMBER_WEBROOT", webRootPath);
         DEFINE_VAR("AMBER_PUBLICROOT", publicRootPath);
+        DEFINE_VAR("AMBER_SECUREPORT", portSecure);
+        DEFINE_VAR("AMBER_PORT", port);
 }
 
 #endif

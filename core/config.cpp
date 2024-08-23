@@ -1,5 +1,6 @@
 #include "config.h"
 #include <cstdlib>
+#include "log/log.h"
 
 auto amber::config::loadEnv(std::string_view name) -> const char*
 {

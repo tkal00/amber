@@ -47,6 +47,7 @@ auto amber::Connection::read() -> std::string
                 if (recvBytes > 0)
                         buf.append(buffer, recvBytes);
         } while (recvBytes > 0);
+        LOG_TRACE(buf);
         return buf;
 }
 
