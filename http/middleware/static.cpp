@@ -31,3 +31,13 @@ auto amber::http::middleware::serveStatic(Request &req, Response &res) -> bool
         LOG_TRACE("served static file: " << req.getPath());
         return false;
 }
+
+auto amber::http::middleware::useUtf8(Request &req, Response &res) -> bool
+{
+    std::string contentType(res.getHeader("Content-Type"));
+    if (!contentType.empty())
+        contentType.push_back(';');
+    contentType.append("charset=utf8");
+    res.setHeader("Content-Type", contentType);
+    return true;
+}
