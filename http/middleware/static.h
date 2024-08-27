@@ -5,7 +5,6 @@
 namespace amber::http::middleware
 {
         auto serveStatic(Request& req, Response& res) -> bool;
-        auto useUtf8(Request& req, Response& res) -> bool;
 }
 
 #endif
